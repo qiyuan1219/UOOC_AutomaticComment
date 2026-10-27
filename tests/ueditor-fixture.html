@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><title>UEditor 与 AngularJS 数据同步测试</title>
+<style>body { font: 16px sans-serif; margin: 30px; } iframe { width: 650px; height: 170px; } .release { padding: 12px; width: 140px; background: #09aff0; } #model-field { display: none; }</style>
+<script src="/angular.js"></script></head>
+<body ng-app="editorSyncFixture" ng-controller="CourseController">
+<div id="replies"></div>
+<div id="editor-wrapper" ng-model="replyHtml" ueditor-bridge>
+  <div class="edui-toolbar edui-default">B　I　U　字号</div>
+  <iframe id="ueditor-frame" srcdoc="<!doctype html><html><body contenteditable='true' style='min-height:130px'></body></html>"></iframe>
+</div>
+<textarea id="model-field"></textarea>
+<div class="release" ng-click="handleRelease()">发布回复</div>
+<p id="site-error" ng-bind="error"></p>
+<script>
+// Real AngularJS ng-model/ng-click; the UEditor fixture implements the API and
+// event contract used by the adapter, including an asynchronous blur bridge.
+window.fixtureState = { posted: [], errors: 0, events: [], ready: false };
+angular.module('editorSyncFixture', [])
+  .config(['$compileProvider', function(provider) { provider.debugInfoEnabled(false); }])
+  .controller('CourseController', ['$scope', function(scope) {
+    scope.replyHtml = '';
+    scope.handleRelease = function() {
+      const template = document.createElement('template');
+      template.innerHTML = scope.replyHtml || '';
+      const text = template.content.textContent.trim();
+      if (text.length < 5) {
+        scope.error = '输入的文字要在5个以上';
+        window.fixtureState.errors++;
+        return;
+      }
+      window.fixtureState.posted.push(text);
+      scope.replyHtml = '';
+      scope.error = '';
+    };
+  }])
+  .directive('ueditorBridge', function() {
+    return { require: 'ngModel', link: function(scope, element, attrs, model) {
+      const frame = element[0].querySelector('iframe');
+      function ready() {
+        const body = frame.contentDocument.body;
+        if (!body || window.fixtureState.ready) return;
+        const listeners = {};
+        const editor = {
+          body,
+          setContent: function(html) { body.innerHTML = html; this.fireEvent('contentchange'); },
+          getContent: function() { return body.innerHTML; },
+          getContentTxt: function() { return body.textContent; },
+          getContentLength: function() { return body.textContent.length; },
+          sync: function() { document.getElementById('model-field').value = this.getContent(); },
+          fireEvent: function(name) {
+            window.fixtureState.events.push(name);
+            (listeners[name] || []).forEach(function(listener) { listener(); });
+          },
+          addListener: function(name, listener) { (listeners[name] ||= []).push(listener); }
+        };
+        editor.addListener('blur', function() {
+          scope.$evalAsync(function() { model.$setViewValue(editor.getContent()); });
+        });
+        model.$render = function() { body.innerHTML = model.$viewValue || '<p><br></p>'; };
+        model.$render();
+        // An actual UEditor iframe exposes editor, even when UE is not on this window.
+        if (new URL(location.href).searchParams.has('iframeRegistry')) frame.contentWindow.editor = editor;
+        else window.UE = { instants: { ueditorInstant8: editor } };
+        window.fixtureState.ready = true;
+      }
+      frame.addEventListener('load', ready);
+      if (frame.contentDocument?.URL === 'about:srcdoc' && frame.contentDocument.readyState === 'complete') ready();
+    } };
+  });
+</script>
+</body></html>

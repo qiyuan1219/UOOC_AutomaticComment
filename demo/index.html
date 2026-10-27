@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<title>示例课程 · 本地模拟课程讨论</title>
+<style>
+  body { margin: 50px auto; max-width: 850px; font: 16px/1.8 "Microsoft YaHei", sans-serif; color: #263c4b; padding: 0 25px; }
+  h1 { font-size: 27px; } h2 { font-size: 21px; }
+  .note { padding: 12px 18px; background: #eaf8ff; border-radius: 8px; color: #4c7286; }
+  #replies article { padding: 16px 0; border-bottom: 1px solid #edf1f5; }
+  #replies p { margin: 5px 0; }
+  .toolbar { background: #f6f9fb; border: 1px solid #dbe5eb; padding: 6px 12px; }
+  #reply-editor { min-height: 150px; border: 1px solid #dbe5eb; padding: 15px; outline-color: #04a7ec; }
+  button { margin-top: 15px; padding: 10px 22px; border: 0; border-radius: 5px; background: #04a7ec; color: white; font-size: 15px; cursor: pointer; }
+</style>
+<h1>课程讨论</h1>
+<p class="note">这是匿名演示页面。姓名、课程和回复内容均为占位示例，回复只保存在当前页面。</p>
+<h2>示例课程</h2><p>【帖子内容已匿名处理】</p>
+<h3>全部回复 <span id="total">0</span></h3><div id="replies"></div>
+<div class="toolbar"><b>B</b>　<i>I</i>　<u>U</u>　字体　对齐　链接　图片</div>
+<div id="reply-editor" contenteditable="true" role="textbox" aria-label="回复输入框"></div>
+<button id="publish-reply">发布回复</button>
+<script>
+  const editor = document.getElementById('reply-editor');
+  document.getElementById('publish-reply').addEventListener('click', () => {
+    const value = editor.innerText.trim();
+    if (!value) return;
+    const reply = document.createElement('article');
+    const author = document.createElement('strong'); author.textContent = '【姓名已匿名】';
+    const text = document.createElement('p'); text.textContent = value;
+    const time = document.createElement('small'); time.textContent = new Date().toLocaleTimeString();
+    reply.append(author, text, time);
+    document.getElementById('replies').prepend(reply);
+    document.getElementById('total').textContent = document.querySelectorAll('#replies article').length;
+    editor.replaceChildren();
+  });
+</script>
+</html>

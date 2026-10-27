@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UOOC 讨论回复助手</title>
+  <link rel="stylesheet" href="popup.css">
+  <script type="module" src="popup.js"></script>
+</head>
+<body>
+  <header><span class="mark" aria-hidden="true">↩</span><h1>UOOC 讨论回复</h1><span id="status" class="status">已停止</span></header>
+  <main>
+    <div class="target"><span>目标页面</span><strong id="target">正在读取…</strong></div>
+    <label for="text">回复内容</label>
+    <textarea id="text" rows="3" maxlength="2000">这是一条课程讨论的示例回复</textarea>
+    <div class="settings-grid">
+      <div><label for="intervalSeconds">回复间隔 <span class="muted">秒</span></label><input id="intervalSeconds" type="number" min="30" max="86400" step="1" value="70" aria-describedby="intervalHelp"><small id="intervalHelp">最短 30 秒</small></div>
+      <div><label for="maxReplies">次数上限 <span class="muted">0 不限</span></label><input id="maxReplies" type="number" min="0" max="10000" step="1" value="0"></div>
+    </div>
+    <details id="advanced"><summary>高级设置：页面识别</summary>
+      <label for="editorSelector">输入框 CSS 选择器（可留空）</label>
+      <input id="editorSelector" type="text" placeholder="例如 #reply-editor 或 .w-e-text" spellcheck="false">
+      <label for="buttonSelector">发布按钮 CSS 选择器（可留空）</label>
+      <input id="buttonSelector" type="text" placeholder="例如 #publish-reply" spellcheck="false">
+      <p class="hint">默认识别文本框、富文本和同源 iframe，按“发布回复”文字匹配按钮。跨域 iframe 需单独打开使用。</p>
+    </details>
+    <div class="buttons"><button id="probe" class="secondary">检测页面</button><button id="start" class="primary">开始后台回复</button></div>
+    <button id="stop" class="stop" hidden>停止回复</button>
+    <section class="runtime"><div class="metrics"><span>已点击 <b id="clicks">0</b> 次</span><span id="countdown">尚未开始</span></div><progress id="wait-progress" max="100" value="0" aria-label="等待下一次发布的进度"></progress><p id="message" aria-live="polite">检测不会输入文字或发布回复。</p></section>
+    <p id="error" class="error" role="alert" hidden></p>
+    <details id="history"><summary>运行记录</summary><ul id="logs"></ul></details>
+  </main>
+</body>
+</html>
